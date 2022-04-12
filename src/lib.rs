@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use base64::{decode, encode};
 use image::ImageOutputFormat::Png;
 use image::{buffer, load_from_memory};
@@ -17,6 +15,28 @@ pub fn greyscale(encoded_file: &str) -> String {
 
     img = img.grayscale();
     log(&"grayscale effect applied".into());
+
+    let mut buffer = vec![];
+    img.write_to(&mut buffer, Png).unwrap();
+    log(&"new image written".into());
+
+    let encoded_img = encode(&buffer);
+    let data_url = format!("data:image/png;base64,{}", encoded_img);
+
+    return data_url;
+}
+
+#[wasm_bindgen]
+pub fn blur(encoded_file: &str) -> String {
+    log(&"Blur".into());
+    let base64_to_vector = decode(encoded_file).unwrap();
+    log(&"Image decoded".into());
+
+    let mut img = load_from_memory(&base64_to_vector).unwrap();
+    log(&"Image loaded".into());
+
+    img = img.blur(3.3);
+    log(&"blur effect applied".into());
 
     let mut buffer = vec![];
     img.write_to(&mut buffer, Png).unwrap();
